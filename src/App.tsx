@@ -4,7 +4,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import { Button } from "./components/ui/button";
 import Layout from "./app/layout";
 import { PageProvider, usePage } from "./store/PageContext";
 import DashboardPage from "./app/DashboardPage";
@@ -27,8 +26,8 @@ function App() {
 const PageContent = () => {
   const { currentPage } = usePage();
 
-  if (currentPage.type === 'collection') {
-    return <DashboardPage dashboardId={currentPage.collectionId} />;
+  if (currentPage.type === 'category') {
+    return <DashboardPage dashboardId={currentPage.categoryId} />;
   }
   
   return <ConnectionsPage />;
