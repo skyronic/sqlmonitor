@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "sqlmonitor",
+  "productName": "SQLMonitor",
   "version": "0.1.0",
   "identifier": "com.sqlmonitor.app",
   "build": {
@@ -17,7 +17,7 @@
   "app": {
     "windows": [
       {
-        "title": "sqlmonitor",
+        "title": "SQLMonitor",
         "width": 800,
         "height": 600
       }

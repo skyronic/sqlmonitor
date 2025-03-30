@@ -9,7 +9,7 @@ import {
   useListMeasurements, useAddMeasurement, useClearMeasurements,
   useLatestMeasurement, useMeasurementStats
 } from '../store/store';
-import type { Connection, Category, Monitor, Measurement } from '../types';
+import type { Monitor } from '../types';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -50,8 +50,8 @@ function TestBed() {
   const { data: connections, isLoading: connectionsLoading } = useListConnections();
   const { data: categories, isLoading: categoriesLoading } = useListCategories();
   const { data: monitors, isLoading: monitorsLoading } = useListMonitors();
-  const { data: starredMonitors, isLoading: starredMonitorsLoading } = useListStarredMonitors();
-  const { data: measurements, isLoading: measurementsLoading } = useListMeasurements(selectedMonitor || 0);
+  const { data: starredMonitors } = useListStarredMonitors();
+  const { data: measurements } = useListMeasurements(selectedMonitor || 0);
   const { data: latestMeasurement } = useLatestMeasurement(selectedMonitor || 0);
   const { data: measurementStats } = useMeasurementStats(selectedMonitor || 0);
   
