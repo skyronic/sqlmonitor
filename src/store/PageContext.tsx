@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useState } from 'react';
 
-type DashboardPage = {
-  type: 'dashboard';
-  dashboardId: string;
+type CollectionPage = {
+  type: 'collection';
+  collectionId: string;
 };
 
 type ConnectionsPage = {
   type: 'connections';
 };
 
-type PageState = DashboardPage | ConnectionsPage;
+type PageState = CollectionPage | ConnectionsPage;
 
 interface PageContextType {
   currentPage: PageState;

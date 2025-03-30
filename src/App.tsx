@@ -27,8 +27,8 @@ function App() {
 const PageContent = () => {
   const { currentPage } = usePage();
 
-  if (currentPage.type === 'dashboard') {
-    return <DashboardPage dashboardId={currentPage.dashboardId} />;
+  if (currentPage.type === 'collection') {
+    return <DashboardPage dashboardId={currentPage.collectionId} />;
   }
   
   return <ConnectionsPage />;
