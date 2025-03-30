@@ -1,10 +1,69 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
-
+use serde::{Serialize, Deserialize};
+use sqlx::Connection;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rustlang!", name)
+}
+
+#[derive(Serialize)]
+struct TestConnectionResponse {
+    success: bool,
+    logs: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct TestConnectionParams {
+    connection_string: String,
+    connection_type: String,
+}
+
+#[tauri::command]
+async fn test_connection(connectionString: String, connectionType: String) -> Result<TestConnectionResponse, String> {
+    let mut logs = Vec::new();
+    logs.push(format!("Connecting to {} database...", connectionType));
+    
+    let result = match connectionType.as_str() {
+        "postgres" => {
+            logs.push("Attempting PostgreSQL connection".to_string());
+            match sqlx::PgConnection::connect(&connectionString).await {
+                Ok(_) => {
+                    logs.push("Connection established successfully".to_string());
+                    logs.push("Connection test completed".to_string());
+                    true
+                },
+                Err(e) => {
+                    logs.push(format!("Connection failed: {}", e));
+                    false
+                }
+            }
+        },
+        "mysql" => {
+            logs.push("Attempting MySQL connection".to_string());
+            match sqlx::MySqlConnection::connect(&connectionString).await {
+                Ok(_) => {
+                    logs.push("Connection established successfully".to_string());
+                    logs.push("Connection test completed".to_string());
+                    true
+                },
+                Err(e) => {
+                    logs.push(format!("Connection failed: {}", e));
+                    false
+                }
+            }
+        },
+        _ => {
+            logs.push(format!("Unsupported database type: {}", connectionType));
+            false
+        }
+    };
+    
+    Ok(TestConnectionResponse {
+        success: result,
+        logs,
+    })
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -75,7 +134,7 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![greet, test_connection])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

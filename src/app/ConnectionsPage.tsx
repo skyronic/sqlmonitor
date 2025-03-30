@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import  {invoke} from "@tauri-apps/api/core"
 
 const ConnectionsPage: React.FC = () => {
   const { data: connections = [], isLoading } = useListConnections();
@@ -88,19 +89,28 @@ const ConnectionsPage: React.FC = () => {
   };
 
   const testConnection = async () => {
-    // Simulated test - in real implementation, this would call your backend
-    setTestResults({
-      success: true,
-      logs: [
-        "Connecting to database...",
-        "Connection established successfully",
-        "Database version: PostgreSQL 14.5",
-        "Connection test completed"
-      ]
-    });
-    
-    // Wait 1 second to simulate async operation
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      setTestResults({
+        success: false,
+        logs: ["Connecting to database..."]
+      });
+      
+      const result = await invoke("test_connection", {
+        connectionString: connectionString,
+        connectionType: type
+      });
+      
+      setTestResults(result as { success: boolean; logs: string[] });
+    } catch (error) {
+      console.error("Connection test error:", error);
+      setTestResults({
+        success: false,
+        logs: [
+          "Connecting to database...",
+          `Error: ${error}`
+        ]
+      });
+    }
   };
 
   return (
@@ -184,7 +194,7 @@ const ConnectionsPage: React.FC = () => {
                 <h3 className={`text-sm font-semibold ${testResults.success ? 'text-green-700' : 'text-red-700'}`}>
                   {testResults.success ? 'Connection Successful' : 'Connection Failed'}
                 </h3>
-                <div className="mt-2 bg-black bg-opacity-75 text-white p-2 rounded text-xs font-mono whitespace-pre overflow-auto max-h-40">
+                <div className="mt-2 bg-black bg-opacity-75 text-white p-2 rounded text-xs font-mono whitespace-pre-wrap overflow-auto max-h-40">
                   {testResults.logs.map((log, index) => (
                     <div key={index}>{log}</div>
                   ))}
