@@ -8,7 +8,7 @@ import {
   useListMonitors, useAddMonitor, useListStarredMonitors, useToggleMonitorStarred,
   useListMeasurements, useAddMeasurement, useClearMeasurements,
   useLatestMeasurement, useMeasurementStats
-} from '../store/store';
+} from '../store/backend';
 import type { Monitor } from '../types';
 
 // Create a client
