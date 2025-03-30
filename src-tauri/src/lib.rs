@@ -1,5 +1,5 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
-use serde::{Serialize, Deserialize};
+use serde::Serialize;
 use sqlx::Connection;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -14,13 +14,8 @@ struct TestConnectionResponse {
     logs: Vec<String>,
 }
 
-#[derive(Deserialize)]
-struct TestConnectionParams {
-    connection_string: String,
-    connection_type: String,
-}
-
 #[tauri::command]
+#[allow(non_snake_case)]
 async fn test_connection(connectionString: String, connectionType: String) -> Result<TestConnectionResponse, String> {
     let mut logs = Vec::new();
     logs.push(format!("Connecting to {} database...", connectionType));

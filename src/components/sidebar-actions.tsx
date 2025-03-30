@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Edit, Trash, MoreHorizontal } from "lucide-react";
 import { Category } from '../types';
 import { useAddCategory, useUpdateCategory, useDeleteCategory } from '../store/backend';
