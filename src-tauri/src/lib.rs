@@ -1,6 +1,6 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
 use serde::Serialize;
-use sqlx::Connection;
+use sqlx::{Connection, Row, FromRow};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -59,6 +59,153 @@ async fn test_connection(connectionString: String, connectionType: String) -> Re
         success: result,
         logs,
     })
+}
+
+#[derive(Serialize)]
+struct RunQueryResponse {
+    success: bool,
+    error: Option<String>,
+    value: Option<String>,
+    logs: Vec<String>,
+}
+
+#[tauri::command]
+#[allow(non_snake_case)]
+async fn run_query(connectionString: String, connectionType: String, query: String) -> Result<RunQueryResponse, String> {
+    let mut logs = Vec::new();
+    logs.push(format!("Connecting to {} database...", connectionType));
+    logs.push(format!("Executing query: {}", query));
+    
+    let result = match connectionType.as_str() {
+        "postgres" => {
+            logs.push("Attempting PostgreSQL connection".to_string());
+            match execute_postgres_query(connectionString, query, &mut logs).await {
+                Ok(value) => RunQueryResponse {
+                    success: true,
+                    error: None,
+                    value: Some(value),
+                    logs,
+                },
+                Err(error) => RunQueryResponse {
+                    success: false,
+                    error: Some(error),
+                    value: None,
+                    logs,
+                }
+            }
+        },
+        "mysql" => {
+            logs.push("Attempting MySQL connection".to_string());
+            match execute_mysql_query(connectionString, query, &mut logs).await {
+                Ok(value) => RunQueryResponse {
+                    success: true,
+                    error: None,
+                    value: Some(value),
+                    logs,
+                },
+                Err(error) => RunQueryResponse {
+                    success: false,
+                    error: Some(error),
+                    value: None,
+                    logs,
+                }
+            }
+        },
+        _ => {
+            let error = format!("Unsupported database type: {}", connectionType);
+            logs.push(error.clone());
+            RunQueryResponse {
+                success: false,
+                error: Some(error),
+                value: None,
+                logs,
+            }
+        }
+    };
+    
+    Ok(result)
+}
+
+async fn execute_postgres_query(connection_string: String, query: String, logs: &mut Vec<String>) -> Result<String, String> {
+    let mut conn = sqlx::PgConnection::connect(&connection_string).await
+        .map_err(|e| format!("Connection failed: {}", e))?;
+    
+    logs.push("Connection established successfully".to_string());
+    
+    let rows = sqlx::query(&query)
+        .fetch_all(&mut conn)
+        .await
+        .map_err(|e| format!("Query execution failed: {}", e))?;
+    
+    if rows.is_empty() {
+        return Err("Query returned no rows".to_string());
+    }
+    
+    if rows.len() > 1 {
+        return Err("Query returned multiple rows, expected single row".to_string());
+    }
+    
+    let row = &rows[0];
+    
+    // Try to get the first column
+    let column_count = row.columns().len();
+    if column_count == 0 {
+        return Err("Query returned a row with no columns".to_string());
+    }
+    
+    if column_count > 1 {
+        return Err("Query returned multiple columns, expected single column".to_string());
+    }
+    
+    // Get value as string
+    let value: Option<String> = row.try_get(0)
+        .map_err(|e| format!("Failed to extract value from result: {}", e))?;
+    
+    match value {
+        Some(v) => Ok(v),
+        None => Err("Query returned NULL value".to_string()),
+    }
+}
+
+async fn execute_mysql_query(connection_string: String, query: String, logs: &mut Vec<String>) -> Result<String, String> {
+    let mut conn = sqlx::MySqlConnection::connect(&connection_string).await
+        .map_err(|e| format!("Connection failed: {}", e))?;
+    
+    logs.push("Connection established successfully".to_string());
+    
+    let rows = sqlx::query(&query)
+        .fetch_all(&mut conn)
+        .await
+        .map_err(|e| format!("Query execution failed: {}", e))?;
+    
+    if rows.is_empty() {
+        return Err("Query returned no rows".to_string());
+    }
+    
+    if rows.len() > 1 {
+        return Err("Query returned multiple rows, expected single row".to_string());
+    }
+    
+    let row = &rows[0];
+    
+    // Try to get the first column
+    let column_count = row.columns().len();
+    if column_count == 0 {
+        return Err("Query returned a row with no columns".to_string());
+    }
+    
+    if column_count > 1 {
+        return Err("Query returned multiple columns, expected single column".to_string());
+    }
+    
+    // Get value as string
+    let value: Option<String> = row.try_get(0)
+        .map_err(|e| format!("Failed to extract value from result: {}", e))?;
+    
+    match value {
+        Some(v) => Ok(v),
+        None => Err("Query returned NULL value".to_string()),
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -129,7 +276,7 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, test_connection])
+        .invoke_handler(tauri::generate_handler![greet, test_connection, run_query])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
