@@ -16,16 +16,14 @@ const queryClient = new QueryClient()
 function App() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Option(Alt)+Shift+S keyboard shortcut
-      if (e.altKey && e.shiftKey && e.key === 'S') {
-        if (confirm('This will reset the database with sample data. Continue?')) {
+      // Secret key: Option+S (ß) on macOS
+      if (e.key === 'ß') {
           seedDatabase();
-        }
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (

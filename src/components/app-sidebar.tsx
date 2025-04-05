@@ -15,6 +15,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar"
+import { Separator } from "./ui/separator";
  
 export function AppSidebar() {
   const { currentPage, setPage } = usePage();
@@ -27,8 +28,9 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="">
-        <h1 className="m-2">SQLMonitor</h1>
+        <h1 className="m-3 ml-8 text-3xl">SQLMonitor</h1>
       </SidebarHeader>
+      <Separator />
       
       <SidebarContent>
         <SidebarGroup>

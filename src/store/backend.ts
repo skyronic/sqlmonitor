@@ -641,3 +641,18 @@ export const useTimeRangeMeasurements = (
     enabled: !!monitor_id && !!startDate && !!endDate
   });
 };
+
+// Get recent measurements (last 50)
+export const useRecentMeasurements = (monitor_id: number) => {
+  return useQuery({
+    queryKey: ['measurements', 'recent', monitor_id],
+    queryFn: async () => {
+      const db = await getDb();
+      return await db.select<Measurement[]>(
+        'SELECT * FROM measurements WHERE monitor_id = $1 ORDER BY created_at DESC LIMIT 50',
+        [monitor_id]
+      );
+    },
+    enabled: !!monitor_id
+  });
+};
