@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { MonitorChart } from './MonitorChart';
 import { MonitorCardErrorBoundary } from './MonitorCardErrorBoundary';
+import { MonitorDialog } from './MonitorDialog';
+import { useState } from 'react';
 
 dayjs.extend(relativeTime);
 
@@ -14,10 +16,15 @@ interface MonitorCardProps {
   monitor: {
     id: number;
     name: string;
+    connection_id: number;
+    cadence: 'hourly' | 'daily';
+    query: string;
+    category_id: number | null;
   };
 }
 
 const MonitorCardContent: React.FC<MonitorCardProps> = ({ monitor }) => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const { data: latestMeasurement } = useLatestMeasurement(monitor.id);
   const { data: recentMeasurements } = useRecentMeasurements(monitor.id);
 
@@ -31,35 +38,43 @@ const MonitorCardContent: React.FC<MonitorCardProps> = ({ monitor }) => {
     : 'Never';
 
   return (
-    <Card className="overflow-hidden bg-background border-border py-4 gap-3">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <div>
-          <CardTitle className="text-base font-medium leading-none">{monitor.name}</CardTitle>
-        </div>
-        <div className="flex gap-0.5">
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Play className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <Separator className="mb-6" />
-        <div className="p-0">
-          <MonitorChart data={chartData} />
-        </div>
-        <Separator className="my-3" />
-        <div className="px-6 flex items-baseline gap-2">
-          <span className="text-lg font-medium">{latestMeasurement?.value ?? 'N/A'}</span>
-          <span className="text-sm ml-2 text-muted-foreground">{lastMeasuredTime}</span>
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card className="overflow-hidden bg-background border-border py-4 gap-3">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle className="text-base font-medium leading-none">{monitor.name}</CardTitle>
+          </div>
+          <div className="flex gap-0.5">
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <Play className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsEditOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Separator className="mb-6" />
+          <div className="p-0">
+            <MonitorChart data={chartData} />
+          </div>
+          <Separator className="my-3" />
+          <div className="px-6 flex items-baseline gap-2">
+            <span className="text-lg font-medium">{latestMeasurement?.value ?? 'N/A'}</span>
+            <span className="text-sm ml-2 text-muted-foreground">{lastMeasuredTime}</span>
+          </div>
+        </CardContent>
+      </Card>
+      <MonitorDialog 
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        monitor={monitor}
+        categoryId={monitor.category_id}
+      />
+    </>
   );
 };
 
