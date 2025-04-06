@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react';
 import { useListMonitors, useLatestMeasurement, useRecentMeasurements, useListCategories } from '../store/backend';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
@@ -17,6 +19,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   ChartConfig,
@@ -63,7 +67,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ dashboardId }) => {
             <Play className="h-4 w-4 mr-2" />
             Run All
           </Button>
-          <Button>
+          <Button variant="outline">
             <Plus className="h-4 w-4 mr-2" />
             Add Monitor
           </Button>
@@ -73,12 +77,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ dashboardId }) => {
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleEditDashboard}>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Dashboard Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleEditDashboard}>
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit Dashboard
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDeleteDashboard} className="text-destructive">
+              <DropdownMenuItem onSelect={handleDeleteDashboard} className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Dashboard
               </DropdownMenuItem>
