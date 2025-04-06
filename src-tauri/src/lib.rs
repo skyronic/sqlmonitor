@@ -301,6 +301,16 @@ pub fn run() {
             ALTER TABLE monitors ADD COLUMN error_message TEXT NULL;
             "#,
             kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 3,
+            description: "add_default_category",
+            sql: r#"
+            -- Insert default category
+            INSERT INTO categories (name, description, created_at, updated_at)
+            VALUES ('Default', 'Default category', datetime('now'), datetime('now'));
+            "#,
+            kind: MigrationKind::Up,
         }
     ];
 

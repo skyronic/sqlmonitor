@@ -27,7 +27,7 @@ export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (categories.length > 0) {
       setCurrentPage({ type: 'category', categoryId: categories[0].id.toString() });
     }
-  }, [categories]);
+  }, []);
 
   const setPage = (page: PageState) => {
     setCurrentPage(page);
