@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useListCategories } from './backend';
 
 type CategoryPage = {
   type: 'category';
@@ -20,6 +21,13 @@ const PageContext = createContext<PageContextType | undefined>(undefined);
 
 export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState<PageState>({ type: 'connections' });
+  const { data: categories = [] } = useListCategories();
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      setCurrentPage({ type: 'category', categoryId: categories[0].id.toString() });
+    }
+  }, [categories]);
 
   const setPage = (page: PageState) => {
     setCurrentPage(page);

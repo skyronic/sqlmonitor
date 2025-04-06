@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useLatestMeasurement, useRecentMeasurements } from '@/store/backend';
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { MonitorChart } from './MonitorChart';
+import { MonitorCardErrorBoundary } from './MonitorCardErrorBoundary';
+
+dayjs.extend(relativeTime);
 
 interface MonitorCardProps {
   monitor: {
@@ -13,7 +17,7 @@ interface MonitorCardProps {
   };
 }
 
-export const MonitorCard: React.FC<MonitorCardProps> = ({ monitor }) => {
+const MonitorCardContent: React.FC<MonitorCardProps> = ({ monitor }) => {
   const { data: latestMeasurement } = useLatestMeasurement(monitor.id);
   const { data: recentMeasurements } = useRecentMeasurements(monitor.id);
 
@@ -56,5 +60,13 @@ export const MonitorCard: React.FC<MonitorCardProps> = ({ monitor }) => {
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+export const MonitorCard: React.FC<MonitorCardProps> = (props) => {
+  return (
+    <MonitorCardErrorBoundary>
+      <MonitorCardContent {...props} />
+    </MonitorCardErrorBoundary>
   );
 }; 

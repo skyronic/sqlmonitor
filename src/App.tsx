@@ -27,13 +27,13 @@ function App() {
   }, []);
 
   return (
-    <PageProvider>
       <QueryClientProvider client={queryClient}>
+    <PageProvider>
         <Layout>
           <PageContent />
         </Layout>
-      </QueryClientProvider>
     </PageProvider>
+      </QueryClientProvider>
   )
 }
 

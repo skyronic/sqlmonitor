@@ -38,24 +38,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           Add Monitor
         </Button>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Dashboard Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onEditDashboard}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit Dashboard
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onDeleteDashboard} className="text-destructive">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Dashboard
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+  <DropdownMenuTrigger><MoreVertical className="h-4 w-4" /></DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem>Profile</DropdownMenuItem>
+    <DropdownMenuItem>Billing</DropdownMenuItem>
+    <DropdownMenuItem>Team</DropdownMenuItem>
+    <DropdownMenuItem>Subscription</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
       </div>
     </div>
   );

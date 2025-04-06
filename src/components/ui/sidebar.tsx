@@ -543,18 +543,19 @@ function SidebarMenuButton({
   )
 }
 
-const SidebarMenuAction = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & {
-    asChild?: boolean
-    showOnHover?: boolean
-  }
->(({ className, asChild = false, showOnHover = false, ...props }, ref) => {
+function SidebarMenuAction({
+  className,
+  asChild = false,
+  showOnHover = false,
+  ...props
+}: React.ComponentProps<"button"> & {
+  asChild?: boolean
+  showOnHover?: boolean
+}) {
   const Comp = asChild ? Slot : "button"
 
   return (
     <Comp
-      ref={ref}
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
       className={cn(
@@ -572,8 +573,7 @@ const SidebarMenuAction = React.forwardRef<
       {...props}
     />
   )
-})
-SidebarMenuAction.displayName = "SidebarMenuAction"
+}
 
 function SidebarMenuBadge({
   className,

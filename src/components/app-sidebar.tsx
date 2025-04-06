@@ -49,7 +49,6 @@ export function AppSidebar() {
                     <FolderOpen />
                     <span>{category.name}</span>
                   </SidebarMenuButton>
-                  <CategoryActionsDropdown category={category} />
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
