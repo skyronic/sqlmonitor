@@ -1,7 +1,7 @@
 import { Network, FolderOpen } from "lucide-react"
 import { usePage } from '../store/PageContext';
 import { useListCategories } from '../store/backend';
-import { AddCategoryAction, CategoryActionsDropdown } from './sidebar-actions';
+import { AddCategoryAction } from './sidebar-actions';
 
 import {
   Sidebar,

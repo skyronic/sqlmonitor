@@ -50,7 +50,8 @@ export function AddCategoryAction() {
   const handleSubmit = () => {
     if (name) {
       addCategory.mutate({
-        name
+        name,
+        description: null
       });
       setName('');
       setOpen(false);
@@ -105,7 +106,8 @@ export function EditCategoryAction({ category }: { category: Category }) {
     if (name) {
       updateCategory.mutate({
         id: category.id,
-        name
+        name,
+        description: category.description
       });
       setOpen(false);
     }

@@ -31,6 +31,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ dashboardId }) => 
     <div className="space-y-6">
       <DashboardHeader
         title={categoryName}
+        description={null}
         categoryId={categoryId}
         onRunAll={handleRunAll}
         onEditDashboard={handleEditDashboard}

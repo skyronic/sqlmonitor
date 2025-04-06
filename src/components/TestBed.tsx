@@ -83,7 +83,8 @@ function TestBed() {
     if (!categoryName) return;
     
     addCategory.mutate({
-      name: categoryName
+      name: categoryName,
+      description: null
     }, {
       onSuccess: () => {
         setCategoryName('');

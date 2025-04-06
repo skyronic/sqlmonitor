@@ -30,13 +30,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { MonitorDialog } from './MonitorDialog';
 import { useState } from 'react';
 import { useUpdateCategory, useDeleteCategory } from '@/store/backend';
-import { usePage } from '@/store/PageContext';
 
 interface DashboardHeaderProps {
   title: string;
   description: string | null;
   categoryId: number | null;
   onRunAll: () => void;
+  onEditDashboard: () => void;
+  onDeleteDashboard: () => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -44,8 +45,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   description,
   categoryId,
   onRunAll,
+  onEditDashboard,
+  onDeleteDashboard,
 }) => {
-  const { setPage } = usePage();
   const [isAddMonitorOpen, setIsAddMonitorOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -65,6 +67,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }, {
       onSuccess: () => {
         setIsEditOpen(false);
+        onEditDashboard();
       }
     });
   };
@@ -75,7 +78,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     deleteCategory.mutate(categoryId, {
       onSuccess: () => {
         setIsDeleteOpen(false);
-        setPage({ type: 'connections' });
+        onDeleteDashboard();
       }
     });
   };
