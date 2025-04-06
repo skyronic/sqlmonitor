@@ -11,6 +11,7 @@ export interface Connection {
   export interface Category {
     id: number;
     name: string;
+    description: string | null;
     created_at: string;
     updated_at: string;
   }
@@ -24,6 +25,10 @@ export interface Connection {
     starred: boolean;
     cadence: 'hourly' | 'daily';
     query: string;
+    last_attempt_at: string | null;
+    last_success_at: string | null;
+    last_error_at: string | null;
+    error_message: string | null;
     created_at: string;
     updated_at: string;
   }

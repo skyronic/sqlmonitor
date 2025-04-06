@@ -146,8 +146,8 @@ export const useAddCategory = () => {
       const now = getCurrentTimestamp();
       
       await db.execute(
-        'INSERT INTO categories (name, created_at, updated_at) VALUES ($1, $2, $3)',
-        [category.name, now, now]
+        'INSERT INTO categories (name, description, created_at, updated_at) VALUES ($1, $2, $3, $4)',
+        [category.name, category.description, now, now]
       );
       
       // Get the newly created category
@@ -167,13 +167,13 @@ export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, name }: { id: number, name: string }) => {
+    mutationFn: async ({ id, name, description }: { id: number, name: string, description: string | null }) => {
       const db = await getDb();
       const now = getCurrentTimestamp();
       
       await db.execute(
-        'UPDATE categories SET name = $1, updated_at = $2 WHERE id = $3',
-        [name, now, id]
+        'UPDATE categories SET name = $1, description = $2, updated_at = $3 WHERE id = $4',
+        [name, description, now, id]
       );
       
       // Get the updated category
@@ -265,14 +265,16 @@ export const useAddMonitor = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (monitor: Omit<Monitor, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (monitor: Omit<Monitor, 'id' | 'created_at' | 'updated_at' | 'last_attempt_at' | 'last_success_at' | 'last_error_at' | 'error_message'>) => {
       const db = await getDb();
       const now = getCurrentTimestamp();
       
       await db.execute(
         `INSERT INTO monitors (
-          name, connection_id, category_id, enabled, starred, cadence, query, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          name, connection_id, category_id, enabled, starred, cadence, query, 
+          last_attempt_at, last_success_at, last_error_at, error_message,
+          created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           monitor.name,
           monitor.connection_id,
@@ -281,6 +283,10 @@ export const useAddMonitor = () => {
           monitor.starred ? 1 : 0,
           monitor.cadence,
           monitor.query,
+          null, // last_attempt_at
+          null, // last_success_at
+          null, // last_error_at
+          null, // error_message
           now,
           now
         ]
@@ -356,6 +362,26 @@ export const useEditMonitor = (id: number) => {
       if (data.query !== undefined) {
         updates.push('query = $' + (params.length + 1));
         params.push(data.query);
+      }
+
+      if (data.last_attempt_at !== undefined) {
+        updates.push('last_attempt_at = $' + (params.length + 1));
+        params.push(data.last_attempt_at);
+      }
+
+      if (data.last_success_at !== undefined) {
+        updates.push('last_success_at = $' + (params.length + 1));
+        params.push(data.last_success_at);
+      }
+
+      if (data.last_error_at !== undefined) {
+        updates.push('last_error_at = $' + (params.length + 1));
+        params.push(data.last_error_at);
+      }
+
+      if (data.error_message !== undefined) {
+        updates.push('error_message = $' + (params.length + 1));
+        params.push(data.error_message);
       }
       
       updates.push('updated_at = $' + (params.length + 1));

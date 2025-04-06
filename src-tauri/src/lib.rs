@@ -266,6 +266,21 @@ pub fn run() {
             CREATE INDEX IF NOT EXISTS idx_measurements_created_at ON measurements (created_at);
             "#,
             kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "add_monitor_status_fields",
+            sql: r#"
+            -- Add description to categories
+            ALTER TABLE categories ADD COLUMN description TEXT NULL;
+
+            -- Add status tracking fields to monitors
+            ALTER TABLE monitors ADD COLUMN last_attempt_at TEXT NULL;
+            ALTER TABLE monitors ADD COLUMN last_success_at TEXT NULL;
+            ALTER TABLE monitors ADD COLUMN last_error_at TEXT NULL;
+            ALTER TABLE monitors ADD COLUMN error_message TEXT NULL;
+            "#,
+            kind: MigrationKind::Up,
         }
     ];
 

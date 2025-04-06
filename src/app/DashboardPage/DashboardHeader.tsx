@@ -38,7 +38,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           Add Monitor
         </Button>
         <DropdownMenu>
-  <DropdownMenuTrigger><MoreVertical className="h-4 w-4" /></DropdownMenuTrigger>
+          <DropdownMenuTrigger><MoreVertical className="h-4 w-4" /></DropdownMenuTrigger>
   <DropdownMenuContent>
     <DropdownMenuLabel>My Account</DropdownMenuLabel>
     <DropdownMenuSeparator />
