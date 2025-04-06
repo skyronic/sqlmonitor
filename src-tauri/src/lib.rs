@@ -156,15 +156,25 @@ async fn execute_postgres_query(connection_string: String, query: String, logs: 
     if column_count > 1 {
         return Err("Query returned multiple columns, expected single column".to_string());
     }
-    
-    // Get value as string
-    let value: Option<String> = row.try_get(0)
-        .map_err(|e| format!("Failed to extract value from result: {}", e))?;
-    
-    match value {
-        Some(v) => Ok(v),
-        None => Err("Query returned NULL value".to_string()),
+
+    // Try different numeric types first, then fall back to string
+    if let Ok(value) = row.try_get::<i64, _>(0) {
+        return Ok(value.to_string());
     }
+    if let Ok(value) = row.try_get::<i32, _>(0) {
+        return Ok(value.to_string());
+    }
+    if let Ok(value) = row.try_get::<f64, _>(0) {
+        return Ok(value.to_string());
+    }
+    if let Ok(value) = row.try_get::<Option<String>, _>(0) {
+        return match value {
+            Some(v) => Ok(v),
+            None => Err("Query returned NULL value".to_string()),
+        };
+    }
+    
+    Err("Could not convert query result to a supported type".to_string())
 }
 
 async fn execute_mysql_query(connection_string: String, query: String, logs: &mut Vec<String>) -> Result<String, String> {
@@ -197,15 +207,25 @@ async fn execute_mysql_query(connection_string: String, query: String, logs: &mu
     if column_count > 1 {
         return Err("Query returned multiple columns, expected single column".to_string());
     }
-    
-    // Get value as string
-    let value: Option<String> = row.try_get(0)
-        .map_err(|e| format!("Failed to extract value from result: {}", e))?;
-    
-    match value {
-        Some(v) => Ok(v),
-        None => Err("Query returned NULL value".to_string()),
+
+    // Try different numeric types first, then fall back to string
+    if let Ok(value) = row.try_get::<i64, _>(0) {
+        return Ok(value.to_string());
     }
+    if let Ok(value) = row.try_get::<i32, _>(0) {
+        return Ok(value.to_string());
+    }
+    if let Ok(value) = row.try_get::<f64, _>(0) {
+        return Ok(value.to_string());
+    }
+    if let Ok(value) = row.try_get::<Option<String>, _>(0) {
+        return match value {
+            Some(v) => Ok(v),
+            None => Err("Query returned NULL value".to_string()),
+        };
+    }
+    
+    Err("Could not convert query result to a supported type".to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

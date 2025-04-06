@@ -125,6 +125,21 @@ export const useDeleteConnection = () => {
   });
 };
 
+export const useGetConnection = (id: number) => {
+  return useQuery({
+    queryKey: ['connections', id],
+    queryFn: async () => {
+      const db = await getDb();
+      const result = await db.select<Connection[]>(
+        'SELECT * FROM connections WHERE id = $1',
+        [id]
+      );
+      return result.length > 0 ? result[0] : null;
+    },
+    enabled: !!id
+  });
+};
+
 // ============ Category Hooks ============
 
 export const useListCategories = () => {
