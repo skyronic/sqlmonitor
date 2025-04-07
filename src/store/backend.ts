@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Database from '@tauri-apps/plugin-sql';
 import type { Connection, Category, Monitor, Measurement } from '../types';
+import { useVault } from './VaultContext';
+import { v4 as uuidv4 } from 'uuid';
 
 // Database initialization
 let dbPromise: Promise<Database> | null = null;
@@ -21,27 +23,42 @@ const getCurrentTimestamp = (): string => {
 // ============ Connection Hooks ============
 
 export const useListConnections = () => {
+  const { getSecret } = useVault();
+  
   return useQuery({
     queryKey: ['connections'],
     queryFn: async () => {
       const db = await getDb();
-      return await db.select<Connection[]>('SELECT * FROM connections ORDER BY name');
+      const connections = await db.select<Connection[]>('SELECT * FROM connections ORDER BY name');
+      
+      // Decrypt connection strings
+      return connections.map(conn => ({
+        ...conn,
+        connection_string: getSecret(conn.connection_string) || conn.connection_string
+      }));
     }
   });
 };
 
 export const useAddConnection = () => {
   const queryClient = useQueryClient();
+  const { setSecret } = useVault();
   
   return useMutation({
     mutationFn: async (connection: Omit<Connection, 'id' | 'created_at' | 'updated_at'>) => {
       const db = await getDb();
       const now = getCurrentTimestamp();
       
-      // Insert the connection
+      // Generate a unique key for the vault
+      const secretKey = `conn_${uuidv4()}`;
+      
+      // Store the actual connection string in the vault
+      setSecret(secretKey, connection.connection_string);
+      
+      // Insert the connection with a reference to the vault key
       await db.execute(
         'INSERT INTO connections (name, type, connection_string, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)',
-        [connection.name, connection.type, connection.connection_string, now, now]
+        [connection.name, connection.type, secretKey, now, now]
       );
       
       // Get the newly created connection
@@ -49,7 +66,12 @@ export const useAddConnection = () => {
         'SELECT * FROM connections ORDER BY id DESC LIMIT 1'
       );
       
-      return result[0];
+      // Return with decrypted connection string
+      const conn = result[0];
+      return {
+        ...conn,
+        connection_string: connection.connection_string
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
@@ -59,11 +81,18 @@ export const useAddConnection = () => {
 
 export const useUpdateConnection = () => {
   const queryClient = useQueryClient();
+  const { setSecret, getSecret } = useVault();
   
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<Connection> & { id: number }) => {
       const db = await getDb();
       const now = getCurrentTimestamp();
+      
+      // Get the current connection to find the existing secret key
+      const currentConn = await db.select<Connection[]>(
+        'SELECT * FROM connections WHERE id = $1',
+        [id]
+      );
       
       const params = [];
       const updates = [];
@@ -79,8 +108,15 @@ export const useUpdateConnection = () => {
       }
       
       if (data.connection_string !== undefined) {
+        // Generate a new key for the vault
+        const newSecretKey = `conn_${uuidv4()}`;
+        
+        // Store the updated connection string in the vault
+        setSecret(newSecretKey, data.connection_string);
+        
+        // Update with reference to the new vault key
         updates.push('connection_string = $' + (params.length + 1));
-        params.push(data.connection_string);
+        params.push(newSecretKey);
       }
       
       updates.push('updated_at = $' + (params.length + 1));
@@ -100,7 +136,15 @@ export const useUpdateConnection = () => {
         [id]
       );
       
-      return result[0];
+      const conn = result[0];
+      
+      // Return with decrypted connection string
+      return {
+        ...conn,
+        connection_string: data.connection_string !== undefined 
+          ? data.connection_string 
+          : getSecret(conn.connection_string) || conn.connection_string
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
@@ -126,6 +170,8 @@ export const useDeleteConnection = () => {
 };
 
 export const useGetConnection = (id: number) => {
+  const { getSecret } = useVault();
+  
   return useQuery({
     queryKey: ['connections', id],
     queryFn: async () => {
@@ -134,7 +180,16 @@ export const useGetConnection = (id: number) => {
         'SELECT * FROM connections WHERE id = $1',
         [id]
       );
-      return result.length > 0 ? result[0] : null;
+      
+      if (result.length === 0) return null;
+      
+      const conn = result[0];
+      
+      // Return with decrypted connection string
+      return {
+        ...conn,
+        connection_string: getSecret(conn.connection_string) || conn.connection_string
+      };
     },
     enabled: !!id
   });
