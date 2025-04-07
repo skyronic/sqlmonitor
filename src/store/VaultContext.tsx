@@ -11,6 +11,7 @@ interface VaultContextType {
   resetVault: (newPassphrase?: string) => Promise<void>;
   // Test helpers
   _setIsSetup: (value: boolean) => void;
+  _setPassphrase: (value: string) => void;
 }
 
 const VaultContext = createContext<VaultContextType | null>(null);
@@ -153,6 +154,10 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 
   // Test helpers
   const _setIsSetup = (value: boolean) => setIsSetup(value);
+  const _setPassphrase = (value: string) => {
+    setPassphrase(value);
+    setUnlocked(true);
+  };
 
   const value = {
     unlocked,
@@ -162,6 +167,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     getSecret,
     resetVault,
     _setIsSetup,
+    _setPassphrase,
   };
 
   return (
