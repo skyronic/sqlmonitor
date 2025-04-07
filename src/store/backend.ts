@@ -32,10 +32,16 @@ export const useListConnections = () => {
       const connections = await db.select<Connection[]>('SELECT * FROM connections ORDER BY name');
       
       // Decrypt connection strings
-      return connections.map(conn => ({
-        ...conn,
-        connection_string: getSecret(conn.connection_string) || conn.connection_string
+      const decryptedConnections = await Promise.all(connections.map(async conn => {
+        // Get secret and return empty string if not found
+        const decryptedString = await getSecret(conn.connection_string) || "";
+        return {
+          ...conn,
+          connection_string: decryptedString
+        };
       }));
+      
+      return decryptedConnections;
     }
   });
 };
@@ -53,7 +59,7 @@ export const useAddConnection = () => {
       const secretKey = `conn_${uuidv4()}`;
       
       // Store the actual connection string in the vault
-      setSecret(secretKey, connection.connection_string);
+      await setSecret(secretKey, connection.connection_string);
       
       // Insert the connection with a reference to the vault key
       await db.execute(
@@ -112,7 +118,7 @@ export const useUpdateConnection = () => {
         const newSecretKey = `conn_${uuidv4()}`;
         
         // Store the updated connection string in the vault
-        setSecret(newSecretKey, data.connection_string);
+        await setSecret(newSecretKey, data.connection_string);
         
         // Update with reference to the new vault key
         updates.push('connection_string = $' + (params.length + 1));
@@ -139,11 +145,16 @@ export const useUpdateConnection = () => {
       const conn = result[0];
       
       // Return with decrypted connection string
+      let decryptedString: string;
+      if (data.connection_string !== undefined) {
+        decryptedString = data.connection_string;
+      } else {
+        decryptedString = await getSecret(conn.connection_string) || "";
+      }
+      
       return {
         ...conn,
-        connection_string: data.connection_string !== undefined 
-          ? data.connection_string 
-          : getSecret(conn.connection_string) || conn.connection_string
+        connection_string: decryptedString
       };
     },
     onSuccess: () => {
@@ -185,10 +196,11 @@ export const useGetConnection = (id: number) => {
       
       const conn = result[0];
       
-      // Return with decrypted connection string
+      // Return with decrypted connection string, using empty string as fallback
+      const decryptedString = await getSecret(conn.connection_string) || "";
       return {
         ...conn,
-        connection_string: getSecret(conn.connection_string) || conn.connection_string
+        connection_string: decryptedString
       };
     },
     enabled: !!id

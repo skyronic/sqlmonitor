@@ -311,6 +311,31 @@ pub fn run() {
             VALUES ('Default', 'Default category', datetime('now'), datetime('now'));
             "#,
             kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 4,
+            description: "add_vault_tables",
+            sql: r#"
+            -- Vaults table to store passphrase hash
+            CREATE TABLE IF NOT EXISTS vaults (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                passphrase_hash TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+
+            -- Secrets table to store encrypted values
+            CREATE TABLE IF NOT EXISTS secrets (
+                key TEXT PRIMARY KEY,
+                encrypted_value TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+
+            -- Index for faster lookups
+            CREATE INDEX IF NOT EXISTS idx_secrets_key ON secrets (key);
+            "#,
+            kind: MigrationKind::Up,
         }
     ];
 
