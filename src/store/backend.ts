@@ -591,6 +591,7 @@ export const useAddMeasurement = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['measurements', data.monitor_id] });
       queryClient.invalidateQueries({ queryKey: ['measurements', 'latest', data.monitor_id] });
+      queryClient.invalidateQueries({ queryKey: ['measurements', 'recent', data.monitor_id] });
       queryClient.invalidateQueries({ queryKey: ['measurements', 'stats', data.monitor_id] });
     }
   });

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useListCategories } from './backend';
 
 type CategoryPage = {
@@ -22,12 +22,14 @@ const PageContext = createContext<PageContextType | undefined>(undefined);
 export const PageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState<PageState>({ type: 'connections' });
   const { data: categories = [] } = useListCategories();
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (categories.length > 0) {
+    if (categories.length > 0 && !hasInitialized.current) {
+      hasInitialized.current = true;
       setCurrentPage({ type: 'category', categoryId: categories[0].id.toString() });
     }
-  }, []);
+  }, [categories]);
 
   const setPage = (page: PageState) => {
     setCurrentPage(page);

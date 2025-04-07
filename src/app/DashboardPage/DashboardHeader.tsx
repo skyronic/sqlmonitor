@@ -1,4 +1,4 @@
-import { Play, Pencil, Trash2, Plus, MoreVertical } from 'lucide-react';
+import { Play, Pencil, Trash2, Plus, MoreVertical, LoaderCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,6 +38,7 @@ interface DashboardHeaderProps {
   onRunAll: () => void;
   onEditDashboard: () => void;
   onDeleteDashboard: () => void;
+  isRunningAll?: boolean;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -47,6 +48,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onRunAll,
   onEditDashboard,
   onDeleteDashboard,
+  isRunningAll = false,
 }) => {
   const [isAddMonitorOpen, setIsAddMonitorOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -91,9 +93,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <p className="text-sm text-muted-foreground">{description || 'Monitor your metrics in real-time'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onRunAll}>
-            <Play className="h-4 w-4 mr-2" />
-            Run All
+          <Button variant="outline" onClick={onRunAll} disabled={isRunningAll}>
+            {isRunningAll ? (
+              <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4 mr-2" />
+            )}
+            {isRunningAll ? 'Running...' : 'Run All'}
           </Button>
           <Button variant="outline" onClick={() => setIsAddMonitorOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
