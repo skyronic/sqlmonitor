@@ -95,7 +95,7 @@ export const useUpdateConnection = () => {
       const now = getCurrentTimestamp();
       
       // Get the current connection to find the existing secret key
-      const currentConn = await db.select<Connection[]>(
+      await db.select<Connection[]>(
         'SELECT * FROM connections WHERE id = $1',
         [id]
       );

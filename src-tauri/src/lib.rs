@@ -1,6 +1,6 @@
 use tauri_plugin_sql::{Migration, MigrationKind};
 use serde::Serialize;
-use sqlx::{Connection, Row, FromRow};
+use sqlx::{Connection, Row };
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]

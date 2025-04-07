@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useVault } from "../store/VaultContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { KeyRound, AlertCircle } from "lucide-react";
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function VaultPage() {
-  const { unlocked, isSetup, tryUnlock, resetVault } = useVault();
+  const { isSetup, tryUnlock, resetVault } = useVault();
   const [passphrase, setPassphrase] = useState("");
   const [confirmPassphrase, setConfirmPassphrase] = useState("");
   const [error, setError] = useState<string | null>(null);
